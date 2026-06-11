@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Eaves Gutter & Downpipe Sizing — AS/NZS 3500.3</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="logo.js"></script>
+<style>
+  :root{--bg:#0f1722;--panel:#16202e;--panel2:#1d2a3a;--line:#2a3a4f;--txt:#e8eef5;--muted:#9fb0c3;--accent:#3da9fc;--good:#34c77b;--bad:#ff5c6c;--warn:#ffb454;}
+  *{box-sizing:border-box}
+  body{margin:0;font:15px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--txt)}
+  header{padding:18px 28px;border-bottom:1px solid var(--line);background:var(--panel);display:flex;align-items:baseline;gap:14px;flex-wrap:wrap}
+  header h1{font-size:18px;margin:0;font-weight:650} header .sub{color:var(--muted);font-size:13px}
+  .wrap{max-width:1200px;margin:0 auto;padding:22px 28px 90px;display:grid;grid-template-columns:1.18fr 0.82fr;gap:24px}
+  @media(max-width:940px){.wrap{grid-template-columns:1fr}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin-bottom:20px}
+  .card h2{font-size:14px;text-transform:uppercase;letter-spacing:.06em;color:var(--accent);margin:0 0 14px;font-weight:650}
+  .card h2 .note{text-transform:none;letter-spacing:0;color:var(--muted);font-weight:400;font-size:12px}
+  label{display:block;font-size:12.5px;color:var(--muted);margin:0 0 4px}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px 16px;margin-bottom:12px} .row.three{grid-template-columns:1fr 1fr 1fr}
+  input,select{width:100%;background:var(--panel2);border:1px solid var(--line);color:var(--txt);border-radius:8px;padding:8px 10px;font-size:14px;font-family:inherit}
+  input:focus,select:focus{outline:none;border-color:var(--accent)}
+  .hint{font-size:11.5px;color:var(--muted);margin-top:3px}
+  .sticky{position:sticky;top:22px}
+  .result-head{display:flex;align-items:center;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+  .badge{font-weight:700;font-size:13px;padding:5px 12px;border-radius:999px}
+  .badge.pass{background:rgba(52,199,123,.16);color:var(--good);border:1px solid var(--good)}
+  .badge.fail{background:rgba(255,92,108,.16);color:var(--bad);border:1px solid var(--bad)}
+  .badge.idle{background:var(--panel2);color:var(--muted);border:1px solid var(--line)}
+  table.out{width:100%;border-collapse:collapse;font-size:13.5px}
+  table.out td{padding:6px 4px;border-bottom:1px solid var(--line);vertical-align:top}
+  table.out td:last-child{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap} table.out td.k{color:var(--muted)}
+  .check{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;background:var(--panel2);margin-bottom:8px;font-size:13px;border:1px solid var(--line)}
+  .check .v{font-weight:650;white-space:nowrap}
+  .check.ok{border-color:rgba(52,199,123,.5)} .check.ok .v{color:var(--good)}
+  .check.no{border-color:rgba(255,92,108,.5)} .check.no .v{color:var(--bad)}
+  .check.warn{border-color:rgba(255,180,84,.5)} .check.warn .v{color:var(--warn)}
+  .actions{display:flex;gap:10px;margin-top:16px}
+  button{cursor:pointer;border:none;border-radius:9px;padding:11px 18px;font-size:14px;font-weight:600;font-family:inherit}
+  button.primary{background:var(--accent);color:#04121f} button.ghost{background:var(--panel2);color:var(--txt);border:1px solid var(--line)}
+  button:disabled{opacity:.5;cursor:not-allowed}
+  .disclaimer{font-size:11.5px;color:var(--muted);line-height:1.5;margin-top:14px;border-top:1px dashed var(--line);padding-top:12px}
+  .err{color:var(--bad);font-size:12.5px;margin-top:8px;min-height:1em}
+  .pill{display:inline-block;font-size:11px;color:var(--muted);background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:2px 7px;margin-left:6px}
+  .bom a{color:var(--accent)}
+  details{margin-top:10px} summary{cursor:pointer;color:var(--accent);font-size:13px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Eaves Gutter &amp; Downpipe Sizing — AS/NZS 3500.3</h1>
+  <span class="sub">catchment → design flow → downpipes required &amp; eaves gutter capacity check</span>
+  <a href="/" style="margin-left:auto;align-self:center;color:var(--accent);text-decoration:none;font-size:13px;font-weight:600;border:1px solid var(--line);border-radius:8px;padding:6px 13px;white-space:nowrap">← All tools</a>
+</header>
+
+<div class="wrap">
+  <div>
+    <div class="card">
+      <h2>Project details</h2>
+      <div class="row">
+        <div class="field"><label>Company / consultant</label><input id="company" value="Mayfair"></div>
+        <div class="field"><label>Job / reference no.</label><input id="jobno" placeholder="e.g. G9601"></div>
+      </div>
+      <div class="row">
+        <div class="field"><label>Project / element</label><input id="project" placeholder="e.g. dwelling — north eaves"></div>
+        <div class="field"><label>Project address</label><input id="address"></div>
+      </div>
+      <div class="row three">
+        <div class="field"><label>Prepared by</label><input id="author" placeholder="Name"></div>
+        <div class="field"><label>Role / reg. no.</label><input id="role" placeholder="e.g. Design Engineer"></div>
+        <div class="field"><label>Date</label><input id="rdate" type="date"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Catchment &amp; rainfall <span class="note">— eaves gutters: 5% AEP (1-in-20), 5-min</span></h2>
+      <div class="bom" style="background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:12px">
+        <div class="hint">Get the 5-min, 5% AEP intensity from the <a href="http://www.bom.gov.au/water/designRainfalls/revised-ifd/" target="_blank" rel="noopener">BoM IFD2016 tool ↗</a> for the site, and enter it below.</div>
+      </div>
+      <div class="row three">
+        <div class="field"><label>Rainfall intensity i (mm/h)</label><input id="i" type="number" step="any" value="155"><div class="hint">5-min, 5% AEP.</div></div>
+        <div class="field"><label>Roof catchment area (m²)</label><input id="A" type="number" step="any" value="120"><div class="hint">Plan area to this gutter.</div></div>
+        <div class="field"><label>Runoff coefficient C</label><input id="C" type="number" step="any" value="1.0"><div class="hint">Roof ≈ 1.0.</div></div>
+      </div>
+      <div class="row three">
+        <div class="field"><label>Adjacent wall area (m²)</label><input id="Aw" type="number" step="any" value="0"></div>
+        <div class="field"><label>Wall allowance factor</label><input id="wf" type="number" step="any" value="0.5"><div class="hint">Wind-driven rain.</div></div>
+        <div class="field"><label>Min. design flow (L/s)</label><input id="minQ" type="number" step="any" value="3.0"><div class="hint">Practical min (blockage) per AS/NZS 3500.3.</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Downpipes</h2>
+      <div class="row three">
+        <div class="field"><label>Downpipe type</label>
+          <select id="dpType">
+            <option value="90" data-cap="2.4">90 mm round</option>
+            <option value="100" data-cap="4.0">100 mm round</option>
+            <option value="r10050" data-cap="1.6">100 × 50 rect</option>
+            <option value="r10075" data-cap="3.0">100 × 75 rect</option>
+            <option value="r7550" data-cap="0.9">75 × 50 rect</option>
+            <option value="custom" data-cap="">Custom…</option>
+          </select>
+          <div class="hint">Min 90 mm Ø or 100×50 (AS/NZS 3500.3).</div>
+        </div>
+        <div class="field"><label>Capacity per downpipe (L/s)</label><input id="dpCap" type="number" step="any" value=""><div class="hint" id="dpCapHint">Blank = type default (Table 5.2 — confirm).</div></div>
+        <div class="field"><label>Downpipes provided</label><input id="dpProv" type="number" step="any" value=""><div class="hint">Blank = use the required number.</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Eaves gutter capacity</h2>
+      <div class="row three">
+        <div class="field"><label>Gutter profile</label>
+          <select id="gType">
+            <option value="q115" data-cap="1.0">Quad 115 mm</option>
+            <option value="q150" data-cap="1.8">Quad 150 mm</option>
+            <option value="hr125" data-cap="1.2">Half-round 125 mm</option>
+            <option value="hr150" data-cap="2.0">Half-round 150 mm</option>
+            <option value="custom" data-cap="">Custom…</option>
+          </select>
+          <div class="hint">Rated capacity varies with fall — confirm.</div>
+        </div>
+        <div class="field"><label>Gutter capacity (L/s)</label><input id="gCap" type="number" step="any" value=""><div class="hint" id="gCapHint">Blank = profile default.</div></div>
+        <div class="field"><label>Gutter fall (mm/m)</label><input id="gFall" type="number" step="any" value="" placeholder="optional"><div class="hint">Info only.</div></div>
+      </div>
+      <div class="err" id="err"></div>
+    </div>
+  </div>
+
+  <div>
+    <div class="sticky">
+      <div class="card">
+        <div class="result-head">
+          <span id="verdict" class="badge idle">Awaiting valid inputs</span>
+          <span style="color:var(--muted);font-size:12.5px" id="verdictSub"></span>
+        </div>
+        <div id="checks"></div>
+        <table class="out" id="outTable"><tbody></tbody></table>
+        <div class="actions">
+          <button class="primary" id="pdfBtn" disabled>Download Report</button>
+          <button class="ghost" id="resetBtn">Reset</button>
+        </div>
+        <div class="disclaimer">
+          Calculation aid only. Eaves gutter and downpipe capacities depend on gutter depth, fall and downpipe spacing —
+          confirm against AS/NZS 3500.3:2021 (Table 5.2 etc.), the gutter profile rating and overflow provisions. Overflow
+          measures and the connected stormwater drainage are designed separately. The design engineer remains responsible.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const num = id => { const v = parseFloat($(id).value); return isNaN(v) ? null : v; };
+const fmt = (x,dp=2) => (x===null||x===undefined||!isFinite(x)) ? "—" : Number(x).toLocaleString(undefined,{minimumFractionDigits:dp,maximumFractionDigits:dp});
+$("rdate").valueAsDate = new Date();
+const dpLabel = {"90":"90 mm round","100":"100 mm round","r10050":"100×50 rect","r10075":"100×75 rect","r7550":"75×50 rect","custom":"custom"};
+const gLabel = {"q115":"Quad 115 mm","q150":"Quad 150 mm","hr125":"Half-round 125 mm","hr150":"Half-round 150 mm","custom":"custom"};
+
+document.querySelectorAll("input,select").forEach(el=>{ el.addEventListener("input",calc); el.addEventListener("change",calc); });
+$("resetBtn").addEventListener("click",()=>location.reload());
+
+let LAST=null;
+function calc(){
+  $("err").textContent="";
+  const i=num("i"),A=num("A"),C=num("C")||1,Aw=num("Aw")||0,wf=num("wf")||0,minQ=num("minQ")||0;
+  const need=[]; if(i===null||i<=0)need.push("rainfall i"); if(A===null||A<0)need.push("area A");
+  if(need.length){ setIdle("Enter: "+need.join(", ")); return; }
+
+  const Aeff = A + wf*Aw;
+  const Qraw = C*Aeff*i/3600;            // L/s
+  const Q = Math.max(Qraw, minQ);        // practical min
+  // downpipe
+  const dpT=$("dpType").value, dpDef=parseFloat($("dpType").selectedOptions[0].dataset.cap)||null;
+  let dpCap=num("dpCap"); if(dpCap===null) dpCap=dpDef;
+  $("dpCapHint").textContent = "Blank = "+(dpDef?dpDef+" L/s":"enter")+" (type default — confirm).";
+  const nReq = (dpCap&&dpCap>0) ? Math.max(1, Math.ceil(Q/dpCap)) : null;
+  let nProv=num("dpProv"); const nUsed = nProv!==null?nProv:nReq;
+  const qPerDp = (nUsed&&nUsed>0) ? Q/nUsed : null;
+  const dpPass = (dpCap&&nUsed) ? (qPerDp<=dpCap && nUsed>=nReq) : false;
+  // gutter
+  const gT=$("gType").value, gDef=parseFloat($("gType").selectedOptions[0].dataset.cap)||null;
+  let gCap=num("gCap"); if(gCap===null) gCap=gDef;
+  $("gCapHint").textContent = "Blank = "+(gDef?gDef+" L/s":"enter")+" (profile default).";
+  // gutter must carry each downpipe's share of flow
+  const gPass = (gCap&&qPerDp!==null) ? gCap>=qPerDp : false;
+
+  const pass = dpPass && gPass;
+  const o={i,A,C,Aw,wf,minQ,Aeff,Qraw,Q,minApplied:Q>Qraw,
+    dpT,dpLabelT:dpLabel[dpT],dpCap,dpDef,nReq,nProv,nUsed,qPerDp,dpPass,
+    gT,gLabelT:gLabel[gT],gCap,gDef,gFall:num("gFall"),gPass,pass,
+    areaPerDp:(nUsed&&nUsed>0)?Aeff/nUsed:null};
+  LAST=o; render(o);
+}
+function setIdle(m){ LAST=null; $("verdict").className="badge idle"; $("verdict").textContent="Awaiting valid inputs"; $("verdictSub").textContent=""; $("checks").innerHTML=""; $("outTable").querySelector("tbody").innerHTML=""; $("pdfBtn").disabled=true; if(m)$("err").textContent=m; }
+
+function render(o){
+  const v=$("verdict"); v.className="badge "+(o.pass?"pass":"fail"); v.textContent=o.pass?"ADEQUATE":"CHECK SIZING";
+  v.nextElementSibling.textContent = "Q = "+fmt(o.Q,2)+" L/s · "+(o.nReq||"?")+" downpipe"+(o.nReq===1?"":"s")+" req.";
+  const chk=[];
+  chk.push(check(o.dpPass, (o.nUsed||"?")+" × "+o.dpLabelT+" downpipe(s)", (o.nUsed||"?")+" prov / "+(o.nReq||"?")+" req"));
+  chk.push(check(o.gPass, o.gLabelT+" gutter ≥ flow per downpipe", fmt(o.gCap,1)+" / "+fmt(o.qPerDp,2)+" L/s"));
+  if(o.minApplied) chk.push(checkWarn("Min design flow governs", fmt(o.minQ,1)+" L/s (blockage allowance)"));
+  $("checks").innerHTML=chk.join("");
+  const rows=[
+    ["Effective catchment", fmt(o.Aeff,1)+" m²"],
+    ["Design flow  Q=C·A·i/3600", fmt(o.Qraw,2)+" L/s"+(o.minApplied?" → "+fmt(o.Q,2)+" (min)":"")],
+    ["Downpipe type / capacity", o.dpLabelT+" · "+fmt(o.dpCap,1)+" L/s"],
+    ["Downpipes required", (o.nReq||"—")],
+    ["Downpipes provided", (o.nUsed||"—")],
+    ["Flow per downpipe", fmt(o.qPerDp,2)+" L/s"],
+    ["Catchment per downpipe", fmt(o.areaPerDp,0)+" m²"],
+    ["Gutter profile / capacity", o.gLabelT+" · "+fmt(o.gCap,1)+" L/s"],
+  ];
+  if(o.gFall) rows.push(["Gutter fall", fmt(o.gFall,1)+" mm/m"]);
+  $("outTable").querySelector("tbody").innerHTML=rows.map(r=>`<tr><td class="k">${r[0]}</td><td>${r[1]}</td></tr>`).join("");
+  $("pdfBtn").disabled=false;
+}
+function check(ok,l,v){return `<div class="check ${ok?'ok':'no'}"><span>${ok?'✓':'✗'} ${l}</span><span class="v">${v}</span></div>`;}
+function checkWarn(l,v){return `<div class="check warn"><span>⚠ ${l}</span><span class="v">${v}</span></div>`;}
+calc();
+
+function san(s){return String(s).replace(/Δ/g,"d").replace(/→/g,"->").replace(/−/g,"-").replace(/·/g,".").replace(/≥/g,">=").replace(/≤/g,"<=").replace(/×/g,"x").replace(/²/g,"^2").replace(/³/g,"^3").replace(/✓/g,"[x]").replace(/✗/g,"[ ]").replace(/⚠/g,"!").replace(/[\uD800-\uDFFF]/g,"").replace(/[Ͱ-Ͽ⅐-↏←-⇿∀-⋿⌀-➿]/g,"?");}
+$("pdfBtn").addEventListener("click",()=>{ if(!LAST) return; try{ buildPDF(LAST); }catch(e){ console.error(e); alert("PDF lib not loaded; using print."); window.print(); } });
+function buildPDF(o){
+  const { jsPDF }=window.jspdf; const doc=new jsPDF({unit:"mm",format:"a4"});
+  const _t=doc.text.bind(doc); doc.text=function(s,...r){return _t(Array.isArray(s)?s.map(san):san(s),...r);};
+  const _s=doc.splitTextToSize.bind(doc); doc.splitTextToSize=function(s,...r){return _s(san(String(s)),...r);};
+  const M=18,W=210,right=W-M; let y=M; const f=id=>($(id).value||"—"); const txt=(s,x,yy,op)=>doc.text(String(s),x,yy,op);
+  let tx=M; if(window.MAYFAIR_LOGO&&window.MAYFAIR_LOGO.dataUri){ const lw=40,lh=lw*window.MAYFAIR_LOGO.h/window.MAYFAIR_LOGO.w; try{ doc.addImage(window.MAYFAIR_LOGO.dataUri,window.MAYFAIR_LOGO.type||"PNG",M,9,lw,lh); tx=M+lw+6; }catch(e){} }
+  doc.setTextColor(20,28,38); doc.setFont("helvetica","bold"); doc.setFontSize(14); txt(f("company")+" — Eaves Gutter & Downpipe", tx,14);
+  doc.setFont("helvetica","normal"); doc.setFontSize(9); doc.setTextColor(90,105,120); txt("AS/NZS 3500.3 — roof drainage sizing (5% AEP)", tx,19.5);
+  doc.setDrawColor(244,180,130); doc.setLineWidth(0.8); doc.line(M,24,W-M,24); doc.setLineWidth(0.2); y=32; doc.setTextColor(20,28,38);
+  doc.setFillColor(o.pass?52:255,o.pass?199:92,o.pass?123:108); doc.roundedRect(M,y-5,W-2*M,11,2,2,"F"); doc.setFont("helvetica","bold"); doc.setFontSize(12); doc.setTextColor(255);
+  txt((o.pass?"ADEQUATE":"CHECK SIZING")+" - Q="+fmt(o.Q,2)+" L/s, "+(o.nReq||"?")+" downpipe(s) req.", M+4, y+2.5); doc.setTextColor(20,28,38); y+=14;
+  y=kv(doc,"Project",[["Project / element",f("project")],["Job / ref.",f("jobno")],["Address",f("address")],["Date",f("rdate")],["Prepared by",f("author")],["Role / reg.",f("role")]],M,y,W);
+  y=tbl(doc,"Roof drainage sizing (AS/NZS 3500.3)",[
+    ["Rainfall intensity i (5-min, 5% AEP)", fmt(o.i,0)+" mm/h"],
+    ["Effective catchment (incl. wall)", fmt(o.Aeff,1)+" m^2"],
+    ["Runoff coefficient C", fmt(o.C,2)],
+    ["Design flow Q = C.A.i/3600", fmt(o.Qraw,2)+" L/s"+(o.minApplied?"  -> "+fmt(o.Q,2)+" (practical min "+fmt(o.minQ,1)+")":"")],
+    ["Downpipe type / capacity", o.dpLabelT+"  /  "+fmt(o.dpCap,1)+" L/s"],
+    ["Downpipes required / provided", (o.nReq||"-")+"  /  "+(o.nUsed||"-")],
+    ["Flow per downpipe", fmt(o.qPerDp,2)+" L/s"+(o.dpPass?"  OK":"  EXCEEDS")],
+    ["Catchment per downpipe", fmt(o.areaPerDp,0)+" m^2"],
+    ["Gutter profile / capacity", o.gLabelT+"  /  "+fmt(o.gCap,1)+" L/s"],
+    ["Gutter vs flow per downpipe", fmt(o.gCap,1)+" >= "+fmt(o.qPerDp,2)+" L/s "+(o.gPass?"OK":"EXCEEDS")],
+    o.gFall?["Gutter fall", fmt(o.gFall,1)+" mm/m"]:null
+  ].filter(Boolean),M,y,W);
+  y=ensure(doc,y+2,16,M); doc.setFont("helvetica","bold"); doc.setFontSize(10.5); txt("Result",M,y); y+=5.5; doc.setFont("helvetica","normal"); doc.setFontSize(9.5);
+  y=wrap(doc,(o.pass?"The roof drainage is adequate: "+(o.nUsed)+" x "+o.dpLabelT+" downpipe(s) and the "+o.gLabelT+" gutter carry the design flow of "+fmt(o.Q,2)+" L/s.":"Revise sizing: provide at least "+(o.nReq||"?")+" downpipe(s) and/or a larger gutter so each downpipe's share ("+fmt(o.qPerDp,2)+" L/s) is within the downpipe and gutter capacities.")+" Overflow provisions and the connected stormwater drainage are designed separately.",M,y,W-2*M,4.6);
+  y=ensure(doc,y+2,16,M); doc.setFont("helvetica","normal"); doc.setFontSize(8); doc.setTextColor(110);
+  y=wrap(doc,"Method: Rational Method Q = C.A.i/3600, eaves gutters to 5% AEP (1-in-20) 5-min rainfall, practical minimum design flow applied for blockage. Downpipe and gutter capacities are editable type defaults - confirm against AS/NZS 3500.3:2021 (Table 5.2) and the profile rating. Calculation aid, not design certification.",M,y,W-2*M,3.4);
+  y=ensure(doc,y+4,20,M); doc.setDrawColor(180); doc.line(M,y+9,M+70,y+9); doc.line(right-70,y+9,right,y+9); doc.setFontSize(8.5); doc.setTextColor(90);
+  txt("Prepared by: "+f("author")+"  "+f("role"),M,y+14); txt("Date: "+f("rdate"),right-70,y+14);
+  doc.save((f("jobno")||"eaves").replace(/[^\w -]+/g,"_").trim()+" - Comps.pdf");
+}
+function ensure(doc,y,need,M){ if(y+need>284){doc.addPage(); return M;} return y; }
+function wrap(doc,s,x,y,w,lh){ doc.splitTextToSize(String(s),w).forEach(l=>{y=ensure(doc,y,lh,18); doc.text(l,x,y); y+=lh;}); return y; }
+function kv(doc,t,p,M,y,W){ y=ensure(doc,y,14,M); doc.setFont("helvetica","bold"); doc.setFontSize(10.5); doc.setTextColor(20,28,38); doc.text(t,M,y); y+=5; doc.setFont("helvetica","normal"); doc.setFontSize(9.5); const cw=(W-2*M)/2;
+  for(let i=0;i<p.length;i+=2){ y=ensure(doc,y,6,M); [p[i],p[i+1]].forEach((q,j)=>{ if(!q)return; const x=M+j*cw; doc.setTextColor(120); doc.text(q[0]+":",x,y); doc.setTextColor(20,28,38); const lb=doc.getTextWidth(q[0]+": "); doc.text(String(q[1]),x+lb+1,y); }); y+=5.4; } return y+2; }
+function tbl(doc,t,rows,M,y,W){ y=ensure(doc,y,16,M); doc.setFont("helvetica","bold"); doc.setFontSize(10.5); doc.setTextColor(20,28,38); doc.text(t,M,y); y+=4; const x2=W-M; doc.setFontSize(9.3);
+  rows.forEach((r,i)=>{ y=ensure(doc,y,6,M); if(i%2===0){ doc.setFillColor(244,247,250); doc.rect(M,y-3.4,W-2*M,5.6,"F"); } doc.setFont("helvetica","normal"); doc.setTextColor(60); doc.text(String(r[0]),M+1.5,y); doc.setFont("helvetica","bold"); doc.setTextColor(20,28,38); doc.text(String(r[1]),x2-1.5,y,{align:"right"}); y+=5.6; }); return y+3; }
+</script>
+</body>
+</html>
